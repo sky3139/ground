@@ -99,5 +99,6 @@ void ground_detection(std::string path, std::string filename, const config &cfg)
   pcl::PointCloud<pcl::XYZIL>::Ptr out(new pcl::PointCloud<pcl::XYZIL>);
   RemoveNaNFromPointCloud(*cloud_with_label, *out);
   // writer.writeBinary<pcl::XYZIL>(cfg.savepath + filename, *cloud_with_label);
-  writer.write<pcl::XYZIL>(cfg.savepath + filename, *out, false);
+  writer.write<pcl::XYZIL>(cfg.savepath + filename, *cloud_with_label, false);
+  // writer.writeASCII<pcl::XYZIL>(cfg.savepath + filename, *cloud_with_label, false);
 }
