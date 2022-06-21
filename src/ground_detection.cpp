@@ -13,7 +13,8 @@
 #define PointXYZIL PointXYZI
 
 #include <fstream>
-void write(std::string file_name, pcl::PointCloud<pcl::PointXYZIL> &cloud, std::vector<int> &index)
+template<typename POINT>
+void pcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<int> &index)
 {
   FILE *fp = fopen(file_name.c_str(), "w");
   fprintf(fp, "# .PCD v0.7 - Point Cloud Data file format\n");
@@ -30,30 +31,12 @@ void write(std::string file_name, pcl::PointCloud<pcl::PointXYZIL> &cloud, std::
   int cnt = 0;
   for (auto &it : cloud.points)
   {
-    if (index[cnt] == 1)
-      fprintf(fp, "%f %f %f %d %d\n", it.x, it.y, it.z, (int)it.intensity, 1);
-    else
-      fprintf(fp, "%f %f %f %d %d\n", it.x, it.y, it.z, (int)it.intensity, 0);
+    fprintf(fp, "%f %f %f %d %d\n", it.x, it.y, it.z, (int)it.intensity, index[cnt]);
     cnt++;
   }
   fclose(fp);
 }
-void read(std::string file_name, pcl::PointCloud<pcl::PointXYZIL> &cloud)
-{
-  FILE *fp;
-  fp = fopen(file_name.c_str(), "r");
-  char str[1024];
-  for (int i = 0; i < 11; i++)
-  {
-    fscanf(fp, "%[^\n]\n", str);
-  }
-  for (size_t i = 0; i < 230400; i++)
-  {
-    auto &p = cloud.points[i];
-    fscanf(fp, "%f %f %f %f\n", &p.x, &p.y, &p.z, &p.intensity);
-  }
-  fclose(fp);
-}
+
 #include "pcd_io.h"
 void ground_detection(std::string path, std::string filename, const config &cfg)
 {
@@ -64,7 +47,6 @@ void ground_detection(std::string path, std::string filename, const config &cfg)
   {
     mtime mt("reader");
     reader.read<pcl::PointXYZIL>(path + filename, *cloud_src);
-    read(path + filename, *cloud_src);
   }
   {
     // mtime mt("ex pl");
@@ -81,6 +63,5 @@ void ground_detection(std::string path, std::string filename, const config &cfg)
     pmf.extract(indices);
   }
   cout << cfg.savepath + filename << endl;
-  write(cfg.savepath + filename, *cloud_src, indices);
-  // writer.writeASCII<pcl::XYZIL>(cfg.savepath + filename, *cloud_with_label, false);
+  pcdwrite(cfg.savepath + filename, *cloud_src, indices);
 }

@@ -15,7 +15,11 @@
 
 #include "threadpool.h"
 
+#include "GPF/GPF.h"
 using namespace std;
+extern void fsg_detection(std::string path, std::string filename, const config &cfg);
+extern void gass_detection(std::string path, std::string filename, const config &cfg);
+
 int main(int argc, char **argv)
 {
   mtime mt("all");
@@ -60,9 +64,10 @@ int main(int argc, char **argv)
   threadpool executor(cfg.thread_num);
   for (int i = 0; i < files.size(); i++) // files.size()
   {
-    executor.commit(ground_detection, inPath, files[i], cfg);
+    executor.commit(gass_detection, inPath, files[i], cfg);
   }
-  std::cout << "files.size:" << files.size() << endl;
   executor.waitTask();
+  std::cout << "files.size:" << files.size() << endl;
+
   return (0);
 }

@@ -20,7 +20,14 @@ link_directories(${PCL_LIBRARY_DIRS}
 ${BOOST_LIBRARY_DIRS}
 )
 # //SHARED
-add_library(amp   src/ground_detection.cpp src/apmf.h src/pcd_io.cpp)
+file(GLOB SRC src/GASS/*.cpp)
+
+add_library(amp   src/ground_detection.cpp src/apmf.h 
+src/pcd_io.cpp
+src/GPF/GPF.cpp
+src/FSG/test_floorseg.cpp src/FSG/CloudBin.cpp src/FSG/CloudSegment.cpp src/FSG/FloorSegment.cpp
+${SRC}
+)
 target_link_libraries (amp ${PCL_LIBRARIES} -lpthread )
 
 add_executable(main src/main.cpp)

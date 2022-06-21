@@ -111,6 +111,10 @@
         "cinttypes": "cpp",
         "variant": "cpp",
         "viewport": "cpp",
-        "image": "cpp"
+        "image": "cpp",
+        "types": "cpp",
+        "graphicsthread": "cpp",
+        "operationthread": "cpp",
+        "stateset": "cpp"
     }
 }

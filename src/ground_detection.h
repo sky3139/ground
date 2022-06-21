@@ -3,7 +3,8 @@
 #include <string>
 #include <thread>
 #include <vector>
-
+#include <pcl/point_types.h>
+#include "pcd_io.h"
 struct config
 {
     bool isamp;
@@ -29,3 +30,5 @@ public:
         printf("%-10s:  %6.2f ms\n", info.c_str(), d2 * 0.001f);
     }
 };
+template <typename POINT>
+void pcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<int> &index);
