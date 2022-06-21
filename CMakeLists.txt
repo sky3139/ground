@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(bare_earth)
-SET(CMAKE_BUILD_TYPE "Release")
+# SET(CMAKE_BUILD_TYPE "Release")
+SET(CMAKE_BUILD_TYPE "Debug")
+
 find_package(PCL  REQUIRED)
 find_package(Boost REQUIRED)
 FIND_PACKAGE( OpenMP REQUIRED)
@@ -18,7 +20,7 @@ link_directories(${PCL_LIBRARY_DIRS}
 ${BOOST_LIBRARY_DIRS}
 )
 # //SHARED
-add_library(amp   src/ground_detection.cpp src/apmf.h)
+add_library(amp   src/ground_detection.cpp src/apmf.h src/pcd_io.cpp)
 target_link_libraries (amp ${PCL_LIBRARIES} -lpthread )
 
 add_executable(main src/main.cpp)

@@ -43,7 +43,7 @@ int main(int argc, char **argv)
   fconfig >> cfg.thread_num;
   std::cout << temp << ":" << cfg.thread_num << std::endl;
   getline(fconfig, temp);
-  
+
   struct dirent *ptr;
 
   DIR *dir;
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   closedir(dir);
 
   threadpool executor(cfg.thread_num);
-  for (int i = 0; i < files.size(); i++)
+  for (int i = 0; i < files.size(); i++) // files.size()
   {
     executor.commit(ground_detection, inPath, files[i], cfg);
   }

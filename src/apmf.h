@@ -68,11 +68,11 @@ namespace pcl
 
     /** \brief Get the cell size. */
     inline float
-    getCellSize() const { return (cell_size_); }
+    getCellSize() const { return (1.0f / cell_size_); }
 
     /** \brief Set the cell size. */
     inline void
-    setCellSize(float cell_size) { cell_size_ = cell_size; }
+    setCellSize(float cell_size) { cell_size_ = 1.0f / cell_size; }
 
     /** \brief Get the base to be used in computing progressive window sizes. */
     inline float
@@ -143,8 +143,8 @@ namespace pcl
       float xextent = global_max.x() - global_min.x();
       float yextent = global_max.y() - global_min.y();
 
-      int rows = static_cast<int>(std::floor(yextent / cell_size_) + 1);
-      int cols = static_cast<int>(std::floor(xextent / cell_size_) + 1);
+      int rows = static_cast<int>(std::floor(yextent * cell_size_) + 1);
+      int cols = static_cast<int>(std::floor(xextent * cell_size_) + 1);
 
       Eigen::MatrixXf A(rows, cols);
       A.setConstant(std::numeric_limits<float>::quiet_NaN());
@@ -161,13 +161,13 @@ namespace pcl
       for (int i = 0; i < (int)input_->size(); ++i)
       {
         // ...then test for lower points within the cell
-        PointT p = (*input_)[i];
+        const PointT &p = (*input_)[i];
         if (!pcl::isFinite(p))
           continue;
         if (p.z > max_height_)
           continue;
-        int row = std::floor((p.y - global_min.y()) / cell_size_);
-        int col = std::floor((p.x - global_min.x()) / cell_size_);
+        int row = std::floor((p.y - global_min.y()) * cell_size_);
+        int col = std::floor((p.x - global_min.x()) * cell_size_);
         //
         if (p.z < A(row, col) || std::isnan(A(row, col)))
         {
@@ -260,28 +260,24 @@ namespace pcl
         // std::cout << __LINE__ << std::endl;
         // Find indices of the points whose difference between the source and
         // filtered point clouds is less than the current height threshold.
-        Indices pt_indices;
+        Indices pt_indices(230400, 0);
         for (std::size_t p_idx = 0; p_idx < ground.size(); ++p_idx)
         {
-          PointT p = (*cloud)[p_idx];
+          const PointT &p = (*cloud)[p_idx];
           if (!pcl::isFinite(p))
             continue;
           if (p.z > max_height_)
             continue;
-          int erow = static_cast<int>(std::floor((p.y - global_min.y()) / cell_size_));
-          int ecol = static_cast<int>(std::floor((p.x - global_min.x()) / cell_size_));
+          int erow = static_cast<int>(std::floor((p.y - global_min.y()) * cell_size_));
+          int ecol = static_cast<int>(std::floor((p.x - global_min.x()) * cell_size_));
 
           float diff = p.z - Zf(erow, ecol);
           if (diff < height_thresholds[i])
-            pt_indices.push_back(ground[p_idx]);
+            pt_indices[p_idx] = 1; //.push_back(ground[p_idx]);
         }
-
         A.swap(Zf);
-
         // Ground is now limited to pt_indices
         ground.swap(pt_indices);
-
-        PCL_DEBUG("ground now has %d points\n", ground.size());
       }
 
       deinitCompute();
@@ -312,17 +308,18 @@ namespace pcl
     /** \brief Number of threads to be used. */
     unsigned int threads_;
     float max_height_;
+
   public:
     /** \brief Constructor that sets default values for member variables. */
     Apmf() : max_window_size_(33),
              slope_(0.7f),
              max_distance_(10.0f),
              initial_distance_(0.15f),
-             cell_size_(1.0f),
+             cell_size_(1.0f / 1.0f),
              base_(2.0f),
              exponential_(true),
              threads_(0),
-             max_height_(2.0f){}
+             max_height_(2.0f) {}
   };
 }
 

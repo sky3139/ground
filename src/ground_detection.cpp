@@ -11,62 +11,60 @@
 #include "apmf.h"
 #include <pcl/filters/filter.h>
 #define PointXYZIL PointXYZI
-// namespace pcl
-// {
-void RemoveNaNFromPointCloud(pcl::PointCloud<pcl::XYZIL> &cloud_in, pcl::PointCloud<pcl::XYZIL> &cloud_out)
+
+#include <fstream>
+void write(std::string file_name, pcl::PointCloud<pcl::PointXYZIL> &cloud, std::vector<int> &index)
 {
-  // If the clouds are not the same, prepare the output
-  if (&cloud_in != &cloud_out)
+  FILE *fp = fopen(file_name.c_str(), "w");
+  fprintf(fp, "# .PCD v0.7 - Point Cloud Data file format\n");
+  fprintf(fp, "VERSION 0.7\n");
+  fprintf(fp, "FIELDS x y z intensity label\n");
+  fprintf(fp, "SIZE 4 4 4 4 2\n");
+  fprintf(fp, "TYPE F F F F U\n");
+  fprintf(fp, "COUNT 1 1 1 1 1\n");
+  fprintf(fp, "WIDTH %d\n", 1800);
+  fprintf(fp, "HEIGHT %d\n", 128);
+  fprintf(fp, "VIEWPOINT 0 0 0 1 0 0 0\n");
+  fprintf(fp, "POINTS %d\n", 230400);
+  fprintf(fp, "DATA ascii\n");
+  int cnt = 0;
+  for (auto &it : cloud.points)
   {
-    cloud_out.header = cloud_in.header;
-    cloud_out.points.resize(cloud_in.points.size());
+    if (index[cnt] == 1)
+      fprintf(fp, "%f %f %f %d %d\n", it.x, it.y, it.z, (int)it.intensity, 1);
+    else
+      fprintf(fp, "%f %f %f %d %d\n", it.x, it.y, it.z, (int)it.intensity, 0);
+    cnt++;
   }
-  // Reserve enough space for the indices
-  // index.resize(cloud_in.points.size());
-  size_t j = 0;
-
-  // If the data is dense, we don't need to check for NaN
-  // if (cloud_in.is_dense) // 判断点云中是否是 dense 点云
-  // {
-  //   // Simply copy the data											// 如果是 dense 点云，则输出点云 = 输入点云
-  //   cloud_out = cloud_in;
-  //   // for (j = 0; j < cloud_out.points.size(); ++j)
-  //   // index[j] = static_cast<int>(j);
-  // }
-  // else
-  {
-    for (size_t i = 0; i < cloud_in.points.size(); ++i)
-    {
-      if (!pcl::isFinite(cloud_in.points[i]) //返回一个布尔值，判断当前点的值是不是正常数值
-      )
-        continue;
-      cloud_out.points[j] = cloud_in.points[i];
-      // index[j] = static_cast<int>(i);
-      j++;
-    }
-    if (j != cloud_in.points.size())
-    {
-      // Resize to the correct size
-      cloud_out.points.resize(j);
-      // index.resize(j);
-    }
-
-    cloud_out.height = 1;
-    cloud_out.width = static_cast<uint32_t>(j);
-
-    // Removing bad points => dense (note: 'dense' doesn't mean 'organized')
-    cloud_out.is_dense = true; // 将去除NaN后的点云设置为dense点云
-  }
+  fclose(fp);
 }
+void read(std::string file_name, pcl::PointCloud<pcl::PointXYZIL> &cloud)
+{
+  FILE *fp;
+  fp = fopen(file_name.c_str(), "r");
+  char str[1024];
+  for (int i = 0; i < 11; i++)
+  {
+    fscanf(fp, "%[^\n]\n", str);
+  }
+  for (size_t i = 0; i < 230400; i++)
+  {
+    auto &p = cloud.points[i];
+    fscanf(fp, "%f %f %f %f\n", &p.x, &p.y, &p.z, &p.intensity);
+  }
+  fclose(fp);
+}
+#include "pcd_io.h"
 void ground_detection(std::string path, std::string filename, const config &cfg)
 {
   pcl::PointCloud<pcl::PointXYZIL>::Ptr cloud_src(new pcl::PointCloud<pcl::PointXYZIL>);
-  pcl::PointIndicesPtr ground(new pcl::PointIndices);
+  std::vector<int> indices;
   // 读取点云
-  pcl::PCDReader reader;
+  pcl::MPCDReader reader;
   {
-    // mtime mt("reader");
+    mtime mt("reader");
     reader.read<pcl::PointXYZIL>(path + filename, *cloud_src);
+    read(path + filename, *cloud_src);
   }
   {
     // mtime mt("ex pl");
@@ -80,25 +78,9 @@ void ground_detection(std::string path, std::string filename, const config &cfg)
     pmf.setInitialDistance(0.3f); // 0.5
     pmf.setMaxDistance(0.6f);     // 3
     pmf.max_height_ = cfg.max_height_;
-    pmf.extract(ground->indices);
+    pmf.extract(indices);
   }
-  pcl::PointCloud<pcl::XYZIL>::Ptr cloud_with_label(new pcl::PointCloud<pcl::XYZIL>);
-  pcl::copyPointCloud(*cloud_src, *cloud_with_label);
-  {
-    // mtime mt("omp for");
-#pragma omp for
-    for (int ind : ground->indices)
-    {
-      cloud_with_label->points[ind].label = 1;
-    }
-  }
-  pcl::PCDWriter writer;
   cout << cfg.savepath + filename << endl;
-
-  // std::vector<int> indices;
-  pcl::PointCloud<pcl::XYZIL>::Ptr out(new pcl::PointCloud<pcl::XYZIL>);
-  RemoveNaNFromPointCloud(*cloud_with_label, *out);
-  // writer.writeBinary<pcl::XYZIL>(cfg.savepath + filename, *cloud_with_label);
-  writer.write<pcl::XYZIL>(cfg.savepath + filename, *cloud_with_label, false);
+  write(cfg.savepath + filename, *cloud_src, indices);
   // writer.writeASCII<pcl::XYZIL>(cfg.savepath + filename, *cloud_with_label, false);
 }
