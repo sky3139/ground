@@ -19,6 +19,7 @@
 using namespace std;
 extern void fsg_detection(std::string path, std::string filename, const config &cfg);
 extern void gass_detection(std::string path, std::string filename, const config &cfg);
+extern void ground_detection(std::string path, std::string filename, const config &cfg);
 
 int main(int argc, char **argv)
 {
@@ -27,8 +28,8 @@ int main(int argc, char **argv)
   fstream fconfig("../config.md");
   string temp, inPath, savepath;
   int isamp;
+
   getline(fconfig, temp);
-  // getline(fconfig, inPath);
   fconfig >> inPath;
   std::cout << temp << ":" << inPath << endl;
   getline(fconfig, temp);
@@ -48,6 +49,9 @@ int main(int argc, char **argv)
   std::cout << temp << ":" << cfg.thread_num << std::endl;
   getline(fconfig, temp);
 
+  getline(fconfig, temp);
+  fconfig >> cfg.fun_number;
+  std::cout << temp << ":" << cfg.fun_number << std::endl;
   struct dirent *ptr;
 
   DIR *dir;
@@ -60,11 +64,21 @@ int main(int argc, char **argv)
     files.push_back(string(ptr->d_name));
   }
   closedir(dir);
-
   threadpool executor(cfg.thread_num);
   for (int i = 0; i < files.size(); i++) // files.size()
   {
-    executor.commit(gass_detection, inPath, files[i], cfg);
+    switch (cfg.fun_number)
+    {
+    case 0:
+      executor.commit(ground_detection, inPath, files[i], cfg);
+      break;
+    case 1:
+      executor.commit(gass_detection, inPath, files[i], cfg);
+      break;
+    case 2:
+      executor.commit(fsg_detection, inPath, files[i], cfg);
+      break;
+    }
   }
   executor.waitTask();
   std::cout << "files.size:" << files.size() << endl;

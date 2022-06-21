@@ -45,7 +45,7 @@ void ground_detection(std::string path, std::string filename, const config &cfg)
   // 读取点云
   pcl::MPCDReader reader;
   {
-    mtime mt("reader");
+    // mtime mt("reader");
     reader.read<pcl::PointXYZIL>(path + filename, *cloud_src);
   }
   {
@@ -62,6 +62,6 @@ void ground_detection(std::string path, std::string filename, const config &cfg)
     pmf.max_height_ = cfg.max_height_;
     pmf.extract(indices);
   }
-  cout << cfg.savepath + filename << endl;
+  // cout << cfg.savepath + filename << endl;
   pcdwrite(cfg.savepath + filename, *cloud_src, indices);
 }

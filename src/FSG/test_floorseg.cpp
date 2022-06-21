@@ -17,7 +17,7 @@ void fsg_detection(std::string path, std::string filename, const config &cfg)
 
     pcl::io::loadPCDFile(ply_file, cloud);
 
-    auto startTime = std::chrono::steady_clock::now();
+    // auto startTime = std::chrono::steady_clock::now();
 
     // FloorSegmentParams Initialize
     floorSegmentParams params;
@@ -42,38 +42,7 @@ void fsg_detection(std::string path, std::string filename, const config &cfg)
     std::vector<int> labels;
     segmenter.segment(cloud, &labels);
 
-    std::cout << "Segmentation Finished." << std::endl;
-    pcl::PointCloud<pcl::PointXYZI>::Ptr output_nofloor_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
-    pcl::PointCloud<pcl::PointXYZI>::Ptr output_onlyfloor_cloud_ptr(new pcl::PointCloud<pcl::PointXYZI>);
 
-    cout << cfg.savepath + filename << endl;
     pcdwrite(cfg.savepath + filename, cloud, labels);
 
-    // for (size_t i = 0; i < cloud.size(); ++i)
-    // {
-    //     if (1 == labels[i])
-    //     {
-    //         output_onlyfloor_cloud_ptr->push_back(cloud[i]);
-    //     }
-    //     else
-    //     {
-    //         output_nofloor_cloud_ptr->push_back(cloud[i]);
-    //     }
-    // }
-
-    auto endTime = std::chrono::steady_clock::now();
-    auto ellapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-
-    // std::cout << "-----------------Message Flow Is As Follows.----------------" << std::endl;
-
-    std::cout << "Ellapse-Time: " << ellapsedTime.count() << " milliseconds." << std::endl;
-
-    // std::cout << "segment cloud points size: " << cloud.points.size() << std::endl;
-    // std::cout << "segment floor points size: " << output_onlyfloor_cloud_ptr->points.size() << std::endl;
-    // std::cout << "segment nofloor points size: " << output_nofloor_cloud_ptr->points.size() << std::endl;
-
-    // std::cout << "Save Segmentation Result." << std::endl;
-    // SAVE FLOOR/NOFLOOR PLY FILE
-    //     pcl::io::savePCDFile("noBins_floor.pcd", *output_nofloor_cloud_ptr);
-    //     pcl::io::savePCDFile("onlyBins_floor.pcd", *output_onlyfloor_cloud_ptr);
 }

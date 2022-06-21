@@ -6,7 +6,7 @@
 
 #include "GaussianFloorSegmentation.h"
 template <typename POINT>
-void pcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<int> &index)
+void NEWpcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<int> &index)
 {
     FILE *fp = fopen(file_name.c_str(), "w");
     fprintf(fp, "# .PCD v0.7 - Point Cloud Data file format\n");
@@ -20,10 +20,9 @@ void pcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<
     fprintf(fp, "VIEWPOINT 0 0 0 1 0 0 0\n");
     fprintf(fp, "POINTS %d\n", 230400);
     fprintf(fp, "DATA ascii\n");
-    int cnt = 0;
-
+    register int cnt = 0;
     std::vector<int> all(230400, 0);
-    for (int i = 0; i < index.size(); i++)
+    for (register int i = 0; i < index.size(); i++)
     {
         all[index[i]] = 1;
     }
@@ -37,28 +36,20 @@ void pcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<
 #include "../ground_detection.h"
 void gass_detection(std::string path, std::string filename, const config &cfg)
 {
-    mtime t("gass");
+    // mtime t("gass");
     pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
-
-    pcl::PointIndicesPtr ground(new pcl::PointIndices);
-
     pcl::MPCDReader reader;
-
     reader.read<pcl::PointXYZI>(path + filename, *cloud);
-    auto startTime = std::chrono::steady_clock::now();
-
     pcl::GaussianFloorSegmentationParams params;
 
     pcl::GaussianFloorSegmentation<pcl::PointXYZI> ground_segmentation{params};
     ground_segmentation.setInputCloud(cloud);
-
     ground_segmentation.setKeepGround(true);
     ground_segmentation.setKeepObstacle(false);
     ground_segmentation.setKeepOverHanging(false);
-    {
-        mtime mt("indices");
-        auto &indices = ground_segmentation.getGD();
-        std::cout << cfg.savepath + filename << std::endl;
-        pcdwrite(cfg.savepath + filename, *cloud, indices);
-    }
+
+    // mtime mt("indices");
+    std::vector<int> &indices = ground_segmentation.getGD();
+    // std::cout << cfg.savepath + filename << std::endl;
+    NEWpcdwrite(cfg.savepath + filename, *cloud, indices);
 }

@@ -272,8 +272,7 @@ namespace pcl
           int ecol = static_cast<int>(std::floor((p.x - global_min.x()) * cell_size_));
 
           float diff = p.z - Zf(erow, ecol);
-          if (diff < height_thresholds[i])
-            pt_indices[p_idx] = 1; //.push_back(ground[p_idx]);
+          pt_indices[p_idx] = (diff < height_thresholds[i]); //.push_back(ground[p_idx]);
         }
         A.swap(Zf);
         // Ground is now limited to pt_indices

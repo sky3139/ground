@@ -262,7 +262,7 @@ void GPF_detection(std::string path, std::string filename, const config &cfg)
 	// read cloud data.
 	pcl::PointCloud<pcl::PointXYZI>::Ptr cloudIn(new pcl::PointCloud<pcl::PointXYZI>());
 	{
-		mtime t("read");
+		// mtime t("read");
 		pcl::MPCDReader reader;
 		reader.read(path + filename, *cloudIn);
 	}
@@ -271,9 +271,9 @@ void GPF_detection(std::string path, std::string filename, const config &cfg)
 	std::vector<int> index(cloudIn->points.size(), 0);
 
 	{
-		mtime t("Run");
+		// mtime t("Run");
 		fs.Run(cloudIn, index);
 	}
-	std::cout << cfg.savepath + filename << std::endl;
+	// std::cout << cfg.savepath + filename << std::endl;
 	pcdwrite(cfg.savepath + filename, *cloudIn, index);
 }

@@ -11,6 +11,7 @@ struct config
     std::string temp, inPath, savepath;
     float max_height_;
     int thread_num;
+    int fun_number;
 };
 
 void ground_detection(std::string path, std::string filename, const config &cfg);
