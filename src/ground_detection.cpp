@@ -13,9 +13,27 @@
 #define PointXYZIL PointXYZI
 
 #include <fstream>
-template<typename POINT>
+template <typename POINT>
 void pcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<int> &index)
 {
+  // std::ofstream fs(file_name, std::ios::out);
+  // fs << "# .PCD v0.7 - Point Cloud Data file format\n"
+  //    << "VERSION 0.7\n"
+  //    << "FIELDS x y z intensity label\n"
+  //    << "SIZE 4 4 4 4 2\n"
+  //    << "TYPE F F F F U\n"
+  //    << "COUNT 1 1 1 1 1\n"
+  //    << "WIDTH 1800\n"
+  //    << "HEIGHT 128\n"
+  //    << "VIEWPOINT 0 0 0 1 0 0 0\n"
+  //    << "POINTS 230400\n"
+  //    << "DATA ascii\n";
+  // int cnt = 0;
+  // for (auto &it : cloud.points)
+  // {
+  //   fs << it.x <<" "<< it.y  <<" "<< it.z  <<" "<< (int)it.intensity  <<" "<< index[cnt] << "\n";
+  // }
+  // fs.close();
   FILE *fp = fopen(file_name.c_str(), "w");
   fprintf(fp, "# .PCD v0.7 - Point Cloud Data file format\n");
   fprintf(fp, "VERSION 0.7\n");
@@ -26,7 +44,7 @@ void pcdwrite(std::string file_name, pcl::PointCloud<POINT> &cloud, std::vector<
   fprintf(fp, "WIDTH %d\n", 1800);
   fprintf(fp, "HEIGHT %d\n", 128);
   fprintf(fp, "VIEWPOINT 0 0 0 1 0 0 0\n");
-  fprintf(fp, "POINTS %d\n", 230400);
+  fprintf(fp, "POINTS %ld\n", cloud.points.size());
   fprintf(fp, "DATA ascii\n");
   int cnt = 0;
   for (auto &it : cloud.points)

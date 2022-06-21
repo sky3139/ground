@@ -10,3 +10,4 @@ sudo docker build -t pl:v2 .
 sudo docker load -i pl_v2.tar
 # run 运行容器
 sudo docker run --rm -it  -v /task6:/task6 -v /task6_result/spirt:/task6_result/spirt pl:v2 /usr/bin/bash /root/plane/run.sh
+sudo docker run  -it  -v /task6:/task6 -v /task6_result/spirt:/task6_result/spirt pl:v2 /usr/bin/bash /root/plane/run.sh
